@@ -1,4 +1,4 @@
-from my_web.app import help, run
+from my_web.app import help
 
 
 def test_help(capsys):

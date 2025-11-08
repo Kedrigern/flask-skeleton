@@ -1,5 +1,3 @@
-from typing import Callable
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 

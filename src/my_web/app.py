@@ -4,7 +4,7 @@ import os
 from flask import Flask
 
 from my_web.config import settings
-from my_web.models import User, db
+from my_web.models import db
 from my_web.routes.home import home_bp
 
 HELP = """Usage:
