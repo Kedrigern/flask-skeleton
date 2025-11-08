@@ -12,7 +12,6 @@ dependencies = [
     "flask-sqlalchemy>=3.1.1",
     "ipython>=9.6.0",
     "pydantic-settings>=2.11.0",
-    "python-dotenv>=1.2.1",
 ]
 
 [project.scripts]

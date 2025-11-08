@@ -1,10 +1,11 @@
 import code
+import os
 
-# from dotenv import load_dotenv
 from flask import Flask
 
 from my_web.config import settings
 from my_web.models import User, db
+from my_web.routes.home import home_bp
 
 HELP = """Usage:
 
@@ -17,11 +18,13 @@ Don not forget to set environment variables in a .env file.
 
 
 def create_app() -> Flask:
-    app = Flask(settings.name)
+    template_dir = os.path.join(os.path.dirname(__file__), "templates")
+    app = Flask(settings.name, template_folder=template_dir)
     app.config["SQLALCHEMY_DATABASE_URI"] = settings.db_uri
     db.init_app(app)
     with app.app_context():
         db.create_all()
+    app.register_blueprint(home_bp)
     return app
 
 
