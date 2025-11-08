@@ -1,7 +1,7 @@
 import code
 import os
 
-from flask import Flask
+from flask import Flask, render_template
 
 from my_web.config import settings
 from my_web.models import db
@@ -25,6 +25,15 @@ def create_app() -> Flask:
     with app.app_context():
         db.create_all()
     app.register_blueprint(home_bp)
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        return render_template("errors/500.html"), 500
+
     return app
 
 
