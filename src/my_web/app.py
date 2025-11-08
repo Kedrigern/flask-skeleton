@@ -4,7 +4,7 @@ import code
 from flask import Flask
 
 from my_web.config import settings
-from my_web.models import db
+from my_web.models import User, db
 
 HELP = """Usage:
 
@@ -20,6 +20,8 @@ def create_app() -> Flask:
     app = Flask(settings.name)
     app.config["SQLALCHEMY_DATABASE_URI"] = settings.db_uri
     db.init_app(app)
+    with app.app_context():
+        db.create_all()
     return app
 
 
@@ -30,6 +32,7 @@ def run() -> None:
 
 
 def help() -> None:
+    """Print help message."""
     print(HELP)
 
 
