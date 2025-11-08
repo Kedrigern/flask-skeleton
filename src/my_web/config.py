@@ -1,12 +1,23 @@
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Config:
+
+class Settings(BaseSettings):
     """
     Basic configuration for Flask app.
     """
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        'DATABASE_URL',
-        ''
-    )
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # App configuration
+    name: str
+
+    # Database configuration
+    db_uri: str
+
+    # Server configuration
+    debug: bool = False
+    host: str = "0.0.0.0"
+    port: int = 5000
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+
+settings = Settings()
