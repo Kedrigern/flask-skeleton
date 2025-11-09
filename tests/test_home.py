@@ -19,6 +19,12 @@ def test_home_renders_template(client):
     assert b"My Web App" in response.data
 
 
+def test_home_about_renders_template(client):
+    response = client.get("/about")
+    assert response.status_code == 200
+    assert b"reposiotry" in response.data
+
+
 def test_404_error_renders_template(client):
     response = client.get("/nonexistent")
     assert response.status_code == 404
