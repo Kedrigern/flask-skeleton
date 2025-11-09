@@ -13,23 +13,26 @@ def client():
 
 def test_home_renders_template(client):
     response = client.get("/")
+    data = response.get_data(as_text=True)
     assert response.status_code == 200
-    assert b"<html" in response.data
-    assert b"Hello world" in response.data
-    assert b"My Web App" in response.data
+    assert "<html" in data
+    assert "Hello world" in data
+    assert "My web" in data
 
 
 def test_home_about_renders_template(client):
     response = client.get("/about")
+    data = response.get_data(as_text=True)
     assert response.status_code == 200
-    assert b"reposiotry" in response.data
+    assert "Repository" in data
 
 
 def test_404_error_renders_template(client):
     response = client.get("/nonexistent")
+    data = response.get_data(as_text=True)
     assert response.status_code == 404
-    assert b"404 - Page Not Found" in response.data
-    assert b"The page you are looking for does not exist." in response.data
+    assert "404 - Page Not Found" in data
+    assert "The page you are looking for does not exist." in data
 
 
 def test_500_error_renders_template(client, monkeypatch):
@@ -43,6 +46,7 @@ def test_500_error_renders_template(client, monkeypatch):
 
     client.application.register_blueprint(bp)
     response = client.get("/fail")
+    data = response.get_data(as_text=True)
     assert response.status_code == 500
-    assert b"500 - Internal Server Error" in response.data
-    assert b"Something went wrong on our end." in response.data
+    assert "500 - Internal Server Error" in data
+    assert "Something went wrong on our end." in data

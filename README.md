@@ -17,7 +17,8 @@ Example of basic Flask application with
 ## Basic usage
 
 ```
-uv run web      # run the web server
-uv run pytest   # run tests
-uv run shell    # run a python shell with app context
+cp .env.example .env    # copy example env file, change values
+uv run pytest           # run tests
+uv run web              # run the web server
+uv run shell            # run a python shell with app context
 ```
