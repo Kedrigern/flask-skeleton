@@ -76,4 +76,5 @@ def shell() -> None:
         except ImportError:
             code.interact(local=dict(globals(), **locals()))
 
+
 login_manager.login_view = "auth.login"
