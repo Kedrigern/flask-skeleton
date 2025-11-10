@@ -7,11 +7,11 @@ class Settings(BaseSettings):
     """
 
     # App configuration
-    name: str
-    secret_key: str  # Flask login
+    name: str = "my_web"
+    secret_key: str = "test_secret" # Do not forget to change!
 
     # Database configuration
-    sqlalchemy_database_uri: str
+    sqlalchemy_database_uri: str = "sqlite:///project.db"
 
     # Server configuration
     debug: bool = False
@@ -21,4 +21,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
-settings = Settings()
+try:
+    settings = Settings()
+except Exception as e:
+    raise RuntimeError(f"Settings is missing: {e}")
