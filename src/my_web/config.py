@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     # App configuration
     name: str = "my_web"
-    secret_key: str = "test_secret" # Do not forget to change!
+    secret_key: str = "test_secret"  # Do not forget to change!
 
     # Database configuration
     sqlalchemy_database_uri: str = "sqlite:///project.db"
