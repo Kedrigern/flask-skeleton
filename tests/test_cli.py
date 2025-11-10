@@ -1,8 +1,8 @@
-from my_web.app import help
+from my_web.app import app_help
 
 
 def test_help(capsys):
-    help()
+    app_help()
     captured = capsys.readouterr()
     for word in ["Usage:", "uv run web", "uv run shell", "uv run help"]:
         assert word in captured.out

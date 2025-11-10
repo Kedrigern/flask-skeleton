@@ -2,9 +2,11 @@ import code
 import os
 
 from flask import Flask, render_template
+from flask_login import LoginManager
+from flask_bcrypt import Bcrypt
+from flask_sqlalchemy import SQLAlchemy
 
 from my_web.config import settings
-from my_web.models import db
 from my_web.routes.home import home_bp
 
 HELP = """Usage:
@@ -16,14 +18,22 @@ uv run help     # Show this help message
 Don not forget to set environment variables in a .env file.
 """
 
+db = SQLAlchemy()
+bcrypt = Bcrypt()
+login_manager = LoginManager()
 
 def create_app() -> Flask:
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
     app = Flask(settings.name, template_folder=template_dir)
-    app.config["SQLALCHEMY_DATABASE_URI"] = settings.db_uri
+    app.config["SQLALCHEMY_DATABASE_URI"] = settings.sqlalchemy_database_uri
+    app.config["SECRET_KEY"] = settings.secret_key
     db.init_app(app)
+    login_manager.init_app(app)
+    bcrypt.init_app(app)
     with app.app_context():
-        db.create_all()
+        # is this necessary?
+        from my_web.models import prepare_db
+        prepare_db()
     app.register_blueprint(home_bp)
 
     @app.errorhandler(404)
@@ -43,7 +53,7 @@ def run() -> None:
     app.run(debug=settings.debug, host=settings.host, port=settings.port)
 
 
-def help() -> None:
+def app_help() -> None:
     """Print help message."""
     print(HELP)
 

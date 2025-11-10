@@ -1,19 +1,17 @@
 from enum import Enum
 
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
+from flask_login import UserMixin
+
+from my_web.app import db
 
 class Role(Enum):
     USER = "user"
     ADMIN = "admin"
 
-
-db = SQLAlchemy()
-
-
-class User(db.Model):
+class User(db.Model, UserMixin):
     """
     Application user model.
     """
@@ -25,3 +23,6 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(40), nullable=False, unique=True)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[Role] = mapped_column(default=Role.USER, nullable=False)
+
+def prepare_db() -> None:
+    db.create_all()
