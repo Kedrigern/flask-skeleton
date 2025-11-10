@@ -75,3 +75,5 @@ def shell() -> None:
             embed(header="", user_ns=dict(globals(), **locals()))
         except ImportError:
             code.interact(local=dict(globals(), **locals()))
+
+login_manager.login_view = "auth.login"
