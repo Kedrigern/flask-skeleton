@@ -2,12 +2,12 @@ import code
 import os
 
 from flask import Flask, render_template
-from flask_login import LoginManager
-from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
 
 from my_web.config import settings
+from my_web.extensions import db, bcrypt, login_manager
 from my_web.routes.home import home_bp
+from my_web.routes.auth import auth_bp
+from my_web.routes.user import user_bp
 
 HELP = """Usage:
 
@@ -18,9 +18,13 @@ uv run help     # Show this help message
 Don not forget to set environment variables in a .env file.
 """
 
-db = SQLAlchemy()
-bcrypt = Bcrypt()
-login_manager = LoginManager()
+
+@login_manager.user_loader
+def load_user(user_id):
+    from my_web.models import User
+
+    return User.query.get(int(user_id))
+
 
 def create_app() -> Flask:
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
@@ -33,8 +37,11 @@ def create_app() -> Flask:
     with app.app_context():
         # is this necessary?
         from my_web.models import prepare_db
+
         prepare_db()
     app.register_blueprint(home_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
 
     @app.errorhandler(404)
     def not_found_error(error):

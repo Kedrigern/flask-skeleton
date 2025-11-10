@@ -38,6 +38,7 @@ def test_404_error_renders_template(client):
 def test_500_error_renders_template(client, monkeypatch):
     # Simulate a view raising an exception
     from flask import Blueprint
+
     bp = Blueprint("fail", __name__)
 
     @bp.route("/fail")

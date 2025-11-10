@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     # App configuration
     name: str
-    secret_key: str # Flask login
+    secret_key: str  # Flask login
 
     # Database configuration
     sqlalchemy_database_uri: str

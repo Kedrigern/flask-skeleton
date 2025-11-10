@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Profil uživatele</h2>
+<ul>
+    <li>Jméno: {{ user.name }}</li>
+    <li>Email: {{ user.email }}</li>
+    <li>Role: {{ user.role.value }}</li>
+</ul>
+<a href="{{ url_for('auth.logout') }}">Odhlásit se</a>
+{% endblock %}
