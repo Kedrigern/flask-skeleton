@@ -9,7 +9,7 @@
 Example of basic Flask application with
 
 - proper directory structure 
-- managed by modern uv
+- managed by `uv`
 - unit tests with pytest
 - DB through SQLAlchemy
 - Authentication with Flask-Login

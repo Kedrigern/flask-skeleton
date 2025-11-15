@@ -8,6 +8,7 @@ from my_web.extensions import db, bcrypt, login_manager
 from my_web.routes.home import home_bp
 from my_web.routes.auth import auth_bp
 from my_web.routes.user import user_bp
+from my_web.routes.book import book_bp, book_api_bp
 
 HELP = """Usage:
 
@@ -39,9 +40,12 @@ def create_app() -> Flask:
         from my_web.models import prepare_db
 
         prepare_db()
+
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(book_bp)
+    app.register_blueprint(book_api_bp)
 
     @app.errorhandler(404)
     def not_found_error(error):
