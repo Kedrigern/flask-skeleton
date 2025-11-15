@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from flask import redirect, url_for, request, flash
 from flask_login import login_user, logout_user
 
-from my_web.models import User, db
+from my_web.db.models import User, db
 from my_web.app import bcrypt
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")

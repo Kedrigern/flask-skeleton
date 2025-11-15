@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from my_web.app import create_app
 from my_web.config import Settings, settings
-from my_web.models import db
+from my_web.db.models import db
 
 
 def test_config():

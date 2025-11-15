@@ -20,6 +20,7 @@ dependencies = [
 web = "my_web.app:run"
 shell = "my_web.app:shell"
 help = "my_web.app:app_help"
+load_fixtures = "my_web.app:load_fixtures"
 
 [build-system]
 requires = ["uv_build>=0.8.11,<0.9.0"]

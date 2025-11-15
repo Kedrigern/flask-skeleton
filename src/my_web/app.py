@@ -5,6 +5,7 @@ from flask import Flask, render_template
 
 from my_web.config import settings
 from my_web.extensions import db, bcrypt, login_manager
+from my_web.db.fixtures import initial_library_data
 from my_web.routes.home import home_bp
 from my_web.routes.auth import auth_bp
 from my_web.routes.user import user_bp
@@ -12,9 +13,10 @@ from my_web.routes.book import book_bp, book_api_bp
 
 HELP = """Usage:
 
-uv run web      # Run the Flask web server
-uv run shell    # Run a shell in the app context
-uv run help     # Show this help message
+uv run web              # Run the Flask web server
+uv run shell            # Run a shell in the app context
+uv run load_fixtures    # Load initial data fixtures into the database
+uv run help             # Show this help message
 
 Don not forget to set environment variables in a .env file.
 """
@@ -22,7 +24,7 @@ Don not forget to set environment variables in a .env file.
 
 @login_manager.user_loader
 def load_user(user_id):
-    from my_web.models import User
+    from my_web.db.models import User
 
     return User.query.get(int(user_id))
 
@@ -37,7 +39,7 @@ def create_app() -> Flask:
     bcrypt.init_app(app)
     with app.app_context():
         # is this necessary?
-        from my_web.models import prepare_db
+        from my_web.db.models import prepare_db
 
         prepare_db()
 
@@ -79,6 +81,12 @@ def shell() -> None:
             embed(header="", user_ns=dict(globals(), **locals()))
         except ImportError:
             code.interact(local=dict(globals(), **locals()))
+
+
+def load_fixtures() -> None:
+    """Load initial data fixtures into the database."""
+    app = create_app()
+    initial_library_data(app)
 
 
 login_manager.login_view = "auth.login"

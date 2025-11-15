@@ -1,4 +1,4 @@
-from my_web.models import User
+from my_web.db.models import User
 
 
 def register(client, name, email, password):
