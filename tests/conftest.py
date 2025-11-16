@@ -1,6 +1,7 @@
 import pytest
 from my_web.app import create_app
 from my_web.extensions import db
+from my_web.db.fixtures import initial_library_data
 
 
 @pytest.fixture
@@ -10,6 +11,7 @@ def app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     with app.app_context():
         db.create_all()
+        initial_library_data(app)
         yield app
         db.session.remove()
         db.drop_all()

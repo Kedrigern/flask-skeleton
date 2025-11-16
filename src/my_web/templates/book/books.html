@@ -4,8 +4,28 @@
 
 <p>Books are also available via <a href="{{ url_for('api_book.api_list') }}">api</a>.</p>
 
-{% for book in books %}
-    <p><a href="{{url_for('book.detail', id=book.id)}}">{{book.title}}</a></p>
-{% endfor %}
-
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for book in books %}
+        <tr>
+            <td>
+                <a href="{{url_for('book.detail', id=book.id)}}">{{book.title}}</a>
+            </td>
+            <td>
+                {% for author in book.authors %}
+                    {% if not loop.first %}, {% endif %}{{author.name}}
+                {% endfor %}
+            </td>
+            <td>{{book.isbn}}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Book</h1>
+<h1>{{book.title}}</h1>
 
-<p>Book: {{book.id}}</p>
+<p>{% for author in book.authors %}{% if not loop.first %}, {% endif %}{{author.name}}{% endfor %}</p>
+<p>ISBN: {{book.isbn}}</p>
+
+<hr />
+
+<a href="{{ url_for('book.list') }}">Back to book list</a>
 
 {% endblock %}
