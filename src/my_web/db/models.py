@@ -22,7 +22,9 @@ class User(db.Model, UserMixin):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(40), nullable=False)
-    email: Mapped[str] = mapped_column(String(40), nullable=False, unique=True, index=True)
+    email: Mapped[str] = mapped_column(
+        String(40), nullable=False, unique=True, index=True
+    )
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     role: Mapped[Role] = mapped_column(SAEnum(Role), default=Role.USER, nullable=False)
 
@@ -48,13 +50,17 @@ class BookAuthorAssociation(db.Model):
     __tablename__ = "book_author"
 
     book_id: Mapped[int] = mapped_column(db.ForeignKey("books.id"), primary_key=True)
-    author_id: Mapped[int] = mapped_column(db.ForeignKey("authors.id"), primary_key=True)
+    author_id: Mapped[int] = mapped_column(
+        db.ForeignKey("authors.id"), primary_key=True
+    )
 
     book = relationship("Book", back_populates="author_associations")
     author = relationship("Author", back_populates="book_associations")
 
     def __repr__(self) -> str:
-        return f"<BookAuthorAssociation book_id={self.book_id} author_id={self.author_id}>"
+        return (
+            f"<BookAuthorAssociation book_id={self.book_id} author_id={self.author_id}>"
+        )
 
 
 class Author(db.Model):
@@ -66,12 +72,14 @@ class Author(db.Model):
     name: Mapped[str] = mapped_column(String(60), nullable=False, unique=True)
 
     book_associations = relationship(
-        "BookAuthorAssociation",
-        back_populates="author",
-        cascade="all, delete-orphan"
+        "BookAuthorAssociation", back_populates="author", cascade="all, delete-orphan"
     )
     # Convenient direct access to books
-    books = association_proxy("book_associations", "book", creator=lambda book: BookAuthorAssociation(book=book))
+    books = association_proxy(
+        "book_associations",
+        "book",
+        creator=lambda book: BookAuthorAssociation(book=book),
+    )
 
     def as_dict(self) -> dict:
         return {
@@ -93,12 +101,14 @@ class Book(db.Model):
     isbn: Mapped[str | None] = mapped_column(String(20), nullable=True, unique=True)
 
     author_associations = relationship(
-        "BookAuthorAssociation",
-        back_populates="book",
-        cascade="all, delete-orphan"
+        "BookAuthorAssociation", back_populates="book", cascade="all, delete-orphan"
     )
     # Convenient direct access to authors
-    authors = association_proxy("author_associations", "author", creator=lambda author: BookAuthorAssociation(author=author))
+    authors = association_proxy(
+        "author_associations",
+        "author",
+        creator=lambda author: BookAuthorAssociation(author=author),
+    )
 
     def as_dict(self) -> dict:
         return {

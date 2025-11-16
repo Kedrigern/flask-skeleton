@@ -19,10 +19,26 @@ def initial_library_data(app):
         {"title": "1984", "authors": [authors[0]]},
         {"title": "The Hobbit", "authors": [authors[1]]},
         {"title": "The Lord of the Rings", "authors": [authors[1]]},
-        {"title": "The Silmarillion", "isbn": "978-0-04-823139-0", "authors": [authors[1]]},
-        {"title": "The Witcher: The Last Wish", "isbn": "978-0-575-08244-1", "authors": [authors[2]]},
-        {"title": "Good Omens", "isbn": "978-0-575-07919-3", "authors": [authors[3], authors[4]]},  # co-authored
-        {"title": "American Gods", "isbn": "978-0-06-257223-3", "authors": [authors[4]]},
+        {
+            "title": "The Silmarillion",
+            "isbn": "978-0-04-823139-0",
+            "authors": [authors[1]],
+        },
+        {
+            "title": "The Witcher: The Last Wish",
+            "isbn": "978-0-575-08244-1",
+            "authors": [authors[2]],
+        },
+        {
+            "title": "Good Omens",
+            "isbn": "978-0-575-07919-3",
+            "authors": [authors[3], authors[4]],
+        },  # co-authored
+        {
+            "title": "American Gods",
+            "isbn": "978-0-06-257223-3",
+            "authors": [authors[4]],
+        },
     ]
 
     with app.app_context():
