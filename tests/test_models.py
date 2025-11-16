@@ -47,5 +47,3 @@ def test_cascade_delete_book_associations(app):
     # Author remains
     orwell = Author.query.filter_by(name="George Orwell").first()
     assert orwell is not None
-
-
