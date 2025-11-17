@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for
-from my_web.db.models import Book
+from flask import Blueprint, render_template, redirect, url_for, request
+from my_web.services.book import get_book, get_all_books, get_books_paginated
 
 book_bp = Blueprint("book", __name__, url_prefix="/book")
 book_api_bp = Blueprint("api_book", __name__, url_prefix="/api/v1/book")
@@ -12,22 +12,33 @@ def index():
 
 @book_bp.route("/<int:id>")
 def detail(id: int):
-    book = Book.query.get(id)
+    book = get_book(id)
+    if not book:
+        return render_template("errors/404.html"), 404
     return render_template("book/book.html", book=book)
 
 
 @book_bp.route("/list")
 def list():
-    books = Book.query.all()
+    books = get_all_books()
     return render_template("book/books.html", books=books)
 
 
 @book_api_bp.route("/list")
 def api_list():
-    return [book.as_dict() for book in Book.query.all()]
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("size", 10, type=int)
+    sort_param = request.args.get("sort")
+    filter_param = request.args.get("filter")
+
+    return get_books_paginated(
+        page=page, per_page=per_page, sort_param=sort_param, filter_param=filter_param
+    )
 
 
 @book_api_bp.route("/<int:id>")
 def api_detail(id: int):
-    book = Book.query.get(id)
+    book = get_book(id)
+    if not book:
+        return {"error": "Not found"}, 404
     return book.as_dict()

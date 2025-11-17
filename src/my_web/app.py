@@ -30,6 +30,7 @@ Do not forget to set environment variables in a .env file.
 @login_manager.user_loader
 def load_user(user_id):
     from my_web.db.models import User
+
     return db.session.get(User, int(user_id))
 
 
