@@ -30,15 +30,18 @@ Do not forget to set environment variables in a .env file.
 @login_manager.user_loader
 def load_user(user_id):
     from my_web.db.models import User
+    return db.session.get(User, int(user_id))
 
-    return User.query.get(int(user_id))
 
-
-def create_app() -> Flask:
+def create_app(test_config=None) -> Flask:
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
     app = Flask(settings.name, template_folder=template_dir)
     app.config["SQLALCHEMY_DATABASE_URI"] = settings.sqlalchemy_database_uri
     app.config["SECRET_KEY"] = settings.secret_key
+
+    if test_config:
+        app.config.update(test_config)
+
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)

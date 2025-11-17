@@ -38,16 +38,21 @@ def auth(client):
 
 @pytest.fixture
 def app():
-    app = create_app()
-    app.config["TESTING"] = True
-    app.config["WTF_CSRF_ENABLED"] = False
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    test_config = {
+        "TESTING": True,
+        "WTF_CSRF_ENABLED": False,
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
+    }
+
+    app = create_app(test_config=test_config)
+
     with app.app_context():
         db.create_all()
         initial_library_data(app)
         yield app
         db.session.remove()
         db.drop_all()
+        db.engine.dispose()
 
 
 @pytest.fixture
