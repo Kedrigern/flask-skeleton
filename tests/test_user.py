@@ -4,7 +4,12 @@ from my_web.db.models import User
 def register(client, name, email, password):
     return client.post(
         "/auth/register",
-        data={"name": name, "email": email, "password": password},
+        data={
+            "name": name,
+            "email": email,
+            "password": password,
+            "confirm_password": password,
+        },
         follow_redirects=True,
     )
 

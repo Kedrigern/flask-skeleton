@@ -4,7 +4,7 @@ import sys
 from flask import Flask, render_template
 from flask_migrate import upgrade, init, history, current, migrate as migrate_command
 from my_web.config import settings
-from my_web.extensions import db, bcrypt, login_manager, migrate
+from my_web.extensions import db, bcrypt, login_manager, migrate, csrf
 from my_web.db.fixtures import initial_library_data
 from my_web.routes.home import home_bp
 from my_web.routes.auth import auth_bp
@@ -43,6 +43,7 @@ def create_app() -> Flask:
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
+    csrf.init_app(app)
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
