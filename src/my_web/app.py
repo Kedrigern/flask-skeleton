@@ -23,7 +23,7 @@ uv run db-history       # Show the database migration history
 uv run db-current       # Show the current database revision
 uv run help             # Show this help message
 
-Don not forget to set environment variables in a .env file.
+Do not forget to set environment variables in a .env file.
 """
 
 

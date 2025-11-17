@@ -24,7 +24,7 @@ def logout(client):
 def test_register_success(client):
     response = register(client, "Test", "test@example.com", "password")
     data = response.get_data(as_text=True)
-    assert "Profil uživatele" in data
+    assert "User profile" in data
     user = User.query.filter_by(email="test@example.com").first()
     assert user is not None
 
@@ -40,7 +40,7 @@ def test_login_success(client):
     register(client, "Test", "test@example.com", "password")
     response = login(client, "test@example.com", "password")
     data = response.get_data(as_text=True)
-    assert "Profil uživatele" in data
+    assert "User profile" in data
 
 
 def test_login_invalid(client):
@@ -55,13 +55,13 @@ def test_logout(client):
     login(client, "test@example.com", "password")
     response = logout(client)
     data = response.get_data(as_text=True)
-    assert "Přihlásit" in data or "Prihlasit" in data
+    assert "Login" in data
 
 
 def test_profile_requires_login(client):
     response = client.get("/user/profile", follow_redirects=True)
     data = response.get_data(as_text=True)
-    assert "Přihlášení" in data or "Prihlaseni" in data
+    assert "Login" in data
 
 
 def test_profile_shows_user_data(client):

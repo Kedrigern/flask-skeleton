@@ -13,11 +13,11 @@ Example of basic Flask application with
 - unit tests with [pytest](https://docs.pytest.org/)
 - DB through [SQLAlchemy](https://www.sqlalchemy.org/)
 - Authentication with [Flask-Login](https://flask-login.readthedocs.io/en/latest/)
-- Alembic (db migration) with [Flask-Migrate](https://flask-migrate.readthed
+- Alembic (db migration) with [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/)
 
 ## Basic usage
 
-### Prequisites
+### Prerequisites
 
 ```
 cp .env.example .env    # copy example env file, change values
