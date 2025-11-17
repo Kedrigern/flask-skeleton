@@ -4,6 +4,38 @@ from my_web.extensions import db
 from my_web.db.fixtures import initial_library_data
 
 
+class AuthActions:
+    def __init__(self, client):
+        self._client = client
+
+    def register(self, name, email, password):
+        return self._client.post(
+            "/auth/register",
+            data={
+                "name": name,
+                "email": email,
+                "password": password,
+                "confirm_password": password,
+            },
+            follow_redirects=True,
+        )
+
+    def login(self, email, password):
+        return self._client.post(
+            "/auth/login",
+            data={"email": email, "password": password},
+            follow_redirects=True,
+        )
+
+    def logout(self):
+        return self._client.get("/auth/logout", follow_redirects=True)
+
+
+@pytest.fixture
+def auth(client):
+    return AuthActions(client)
+
+
 @pytest.fixture
 def app():
     app = create_app()
