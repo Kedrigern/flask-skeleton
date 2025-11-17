@@ -120,7 +120,3 @@ class Book(db.Model):
 
     def __repr__(self) -> str:
         return f"<Book id={self.id} title={self.title}>"
-
-
-def prepare_db() -> None:
-    db.create_all()
