@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from my_web.services.book import get_book, get_all_books, get_books_paginated
+from my_web.services.book import BookService
 
 book_bp = Blueprint("book", __name__, url_prefix="/book")
 book_api_bp = Blueprint("api_book", __name__, url_prefix="/api/v1/book")
@@ -12,7 +12,7 @@ def index():
 
 @book_bp.route("/<int:id>")
 def detail(id: int):
-    book = get_book(id)
+    book = BookService.get(id)
     if not book:
         return render_template("errors/404.html"), 404
     return render_template("book/book.html", book=book)
@@ -20,7 +20,7 @@ def detail(id: int):
 
 @book_bp.route("/list")
 def list():
-    books = get_all_books()
+    books = BookService.get_all()
     return render_template("book/books.html", books=books)
 
 
@@ -31,14 +31,16 @@ def api_list():
     sort_param = request.args.get("sort")
     filter_param = request.args.get("filter")
 
-    return get_books_paginated(
-        page=page, per_page=per_page, sort_param=sort_param, filter_param=filter_param
+    return BookService.get_books(
+        page=page,
+        per_page=per_page,
+        sort_param=sort_param,
+        filter_param=filter_param
     )
-
 
 @book_api_bp.route("/<int:id>")
 def api_detail(id: int):
-    book = get_book(id)
+    book = BookService.get(id)
     if not book:
         return {"error": "Not found"}, 404
     return book.as_dict()
