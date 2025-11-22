@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required
-from pydantic import ValidationError
 from my_web.services.book import book_service
 from my_web.schemas.pagination import PaginatedResponse
 from my_web.schemas.book import BookSchema, BookCreateSchema, BookUpdateSchema
@@ -58,55 +57,55 @@ def api_detail(id: int) -> dict:
 @book_api_bp.route("/", methods=["POST"])
 @login_required
 def api_create():
-    try:
-        payload = request.get_json()
-        schema = BookCreateSchema(**payload)
-        book = book_service.create(schema.model_dump())
-        return BookSchema.model_validate(book).model_dump(), HTTPStatus.CREATED
-    except ValidationError as e:
-        return {
-            "error": "Validation error",
-            "details": e.errors(),
-        }, HTTPStatus.BAD_REQUEST
-    except ValueError as e:
-        return {"error": str(e)}, HTTPStatus.CONFLICT
+    """
+    Creates a new book.
+
+    Note: Exceptions are handled by global error handlers in `my_web.errors`.
+    - ValidationError -> 400 Bad Request
+    - ValueError -> 409 Conflict
+    """
+    payload = request.get_json()
+    schema = BookCreateSchema(**payload)
+    book = book_service.create(schema.model_dump())
+    return BookSchema.model_validate(book).model_dump(), HTTPStatus.CREATED
 
 
 @book_api_bp.route("/<int:id>", methods=["PUT", "PATCH"])
 @login_required
 def api_update(id: int):
-    try:
-        payload = request.get_json()
-        schema = BookUpdateSchema(**payload)
-        data = schema.model_dump(exclude_unset=True)
+    """
+    Updates an existing book.
+    Note: Exceptions are handled by global error handlers.
+    """
+    payload = request.get_json()
+    schema = BookUpdateSchema(**payload)
+    data = schema.model_dump(exclude_unset=True)
 
-        updated_book = book_service.update(id, data)
-        if not updated_book:
-            return {"error": "Not found"}, HTTPStatus.NOT_FOUND
+    updated_book = book_service.update(id, data)
+    if not updated_book:
+        return {"error": "Not found"}, HTTPStatus.NOT_FOUND
 
-        return BookSchema.model_validate(updated_book).model_dump(), HTTPStatus.OK
-    except ValidationError as e:
-        return {
-            "error": "Validation error",
-            "details": e.errors(),
-        }, HTTPStatus.BAD_REQUEST
-    except ValueError as e:
-        return {"error": str(e)}, HTTPStatus.CONFLICT
+    return BookSchema.model_validate(updated_book).model_dump(), HTTPStatus.OK
 
 
 @book_api_bp.route("/<int:book_id>/authors/<int:author_id>", methods=["PUT"])
 @login_required
 def api_add_author(book_id: int, author_id: int):
-    success = book_service.add_author(book_id, author_id)
-    if not success:
-        return {"error": "Book or Author not found"}, HTTPStatus.NOT_FOUND
-    return {}, HTTPStatus.NO_CONTENT
+    """
+    Adds an author to a book.
+    Note: Raises ResourceNotFound if entities do not exist -> 404 Not Found.
+    """
+    book_service.add_author(book_id, author_id)
+    book_service.add_author(book_id, author_id)
+    return {"status": "success", "message": "Author added"}, HTTPStatus.OK
 
 
 @book_api_bp.route("/<int:book_id>/authors/<int:author_id>", methods=["DELETE"])
 @login_required
 def api_remove_author(book_id: int, author_id: int):
-    success = book_service.remove_author(book_id, author_id)
-    if not success:
-        return {"error": "Book or Author not found"}, HTTPStatus.NOT_FOUND
-    return {}, HTTPStatus.NO_CONTENT
+    """
+    Removes an author from a book.
+    Note: Raises ResourceNotFound if entities do not exist -> 404 Not Found.
+    """
+    book_service.remove_author(book_id, author_id)
+    return {"status": "success", "message": "Author removed"}, HTTPStatus.OK

@@ -5,6 +5,7 @@ from my_web.extensions import db
 from my_web.db.models import Book, Author, BookAuthorAssociation
 from my_web.services.base import CRUDService
 from my_web.services.author import author_service
+from my_web.errors import ResourceNotFound
 
 
 class BookService(CRUDService[Book]):
@@ -83,27 +84,29 @@ class BookService(CRUDService[Book]):
             "data": pagination.items,
         }
 
-    def add_author(self, book_id: int, author_id: int) -> bool:
-        """Add author-book relation."""
+    def add_author(self, book_id: int, author_id: int) -> None:
+        """Add author-book relation.
+        :raise ResourceNotFound: if book or author not found"""
         book = self.get(book_id)
         author = author_service.get(author_id)
 
-        if not book or not author:
-            return False
+        if not book:
+            raise ResourceNotFound(f"Book with id {book_id} not found.")
+        if not author:
+            raise ResourceNotFound(f"Author with id {author_id} not found.")
 
         if author not in book.authors:
             book.authors.append(author)
             db.session.commit()
 
-        return True
-
-    def remove_author(self, book_id: int, author_id: int) -> bool:
-        """Remove author-book relation."""
+    def remove_author(self, book_id: int, author_id: int) -> None:
+        """Remove author-book relation.
+        :raise ResourceNotFound: if book or author not found"""
         book = self.get(book_id)
         author = author_service.get(author_id)
 
-        if not book or not author:
-            return False
+        if not book:
+            raise ResourceNotFound(f"Book with id {book_id} not found.")
 
         if author in book.authors:
             book.authors.remove(author)

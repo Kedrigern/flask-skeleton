@@ -1,7 +1,7 @@
 import code
 import os
 import sys
-from flask import Flask, render_template
+from flask import Flask
 from flask_migrate import upgrade, init, history, current, migrate as migrate_command
 from my_web.config import settings
 from my_web.extensions import db, bcrypt, login_manager, migrate, csrf
@@ -10,6 +10,7 @@ from my_web.routes.home import home_bp
 from my_web.routes.auth import auth_bp
 from my_web.routes.user import user_bp
 from my_web.routes.book import book_bp, book_api_bp
+from my_web.errors import register_error_handlers
 
 HELP = """Usage:
 
@@ -48,20 +49,14 @@ def create_app(test_config=None) -> Flask:
     login_manager.init_app(app)
     bcrypt.init_app(app)
     csrf.init_app(app)
+
+    register_error_handlers(app)
+
     app.register_blueprint(home_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(book_bp)
     app.register_blueprint(book_api_bp)
-
-    @app.errorhandler(404)
-    def not_found_error(error):
-        return render_template("errors/404.html"), 404
-
-    @app.errorhandler(500)
-    def internal_error(error):
-        return render_template("errors/500.html"), 500
-
     return app
 
 

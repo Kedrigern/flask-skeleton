@@ -36,7 +36,8 @@ class CRUDService(Generic[T]):
         return db.session.execute(db.select(self.MODEL)).scalars().all()
 
     def create(self, data: dict, commit: bool = True) -> T:
-        """Creates a new entity from a data dictionary."""
+        """Creates a new entity from a data dictionary.
+        :raise ValueError: if an IntegrityError occurs during creation."""
         try:
             entity = self.MODEL(**data)
             db.session.add(entity)
@@ -172,7 +173,8 @@ class CRUDService(Generic[T]):
         }
 
     def get_by_name(self, name: str) -> T | None:
-        """Retrieves a single entity by its name field."""
+        """Retrieves a single entity by its name field.
+        :raise AttributeError: if FILTER_FIELD is not defined on the model."""
         if not hasattr(self.MODEL, self.FILTER_FIELD):
             raise AttributeError(
                 f"{self.MODEL.__name__} does not have a 'name' attribute."

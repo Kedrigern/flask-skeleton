@@ -159,7 +159,7 @@ def test_api_create_update_lifecycle(client, auth):
 
     # 4. Add Author (George Orwell has ID 1 from fixtures)
     resp = client.put(f"/api/v1/book/{book_id}/authors/1")
-    assert resp.status_code == 204
+    assert resp.status_code == 200
 
     # 5. Verify Author Added
     resp = client.get(f"/api/v1/book/{book_id}")
@@ -169,7 +169,7 @@ def test_api_create_update_lifecycle(client, auth):
 
     # 6. Remove Author
     resp = client.delete(f"/api/v1/book/{book_id}/authors/1")
-    assert resp.status_code == 204
+    assert resp.status_code == 200
 
     # 7. Verify Empty Again
     resp = client.get(f"/api/v1/book/{book_id}")
