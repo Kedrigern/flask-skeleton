@@ -1,4 +1,5 @@
 import json
+from typing import Any
 from sqlalchemy import func
 from my_web.extensions import db
 from my_web.db.models import Book, Author, BookAuthorAssociation
@@ -16,7 +17,7 @@ class BookService(CRUDService[Book]):
         per_page: int,
         sort_param: str | None = None,
         filter_param: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Retrieves a paginated, filtered, and sorted list of books for API."""
 
         columns_map = {"id": Book.id, "title": Book.title, "isbn": Book.isbn}
@@ -78,7 +79,7 @@ class BookService(CRUDService[Book]):
 
         return {
             "last_page": pagination.pages,
-            "data": [book.as_dict() for book in pagination.items],
+            "data": pagination.items,
         }
 
 

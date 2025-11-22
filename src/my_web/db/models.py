@@ -31,14 +31,6 @@ class User(db.Model, UserMixin):
     def __repr__(self) -> str:  # helpful for debugging
         return f"<User id={self.id} email={self.email} role={self.role.value}>"
 
-    def as_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "name": self.name,
-            "email": self.email,
-            "role": self.role.value,
-        }
-
 
 class BookAuthorAssociation(db.Model):
     """Association table for many-to-many Book <-> Author.
@@ -81,12 +73,6 @@ class Author(db.Model):
         creator=lambda book: BookAuthorAssociation(book=book),
     )
 
-    def as_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "name": self.name,
-        }
-
     def __repr__(self) -> str:
         return f"<Author id={self.id} name={self.name}>"
 
@@ -109,14 +95,6 @@ class Book(db.Model):
         "author",
         creator=lambda author: BookAuthorAssociation(author=author),
     )
-
-    def as_dict(self) -> dict:
-        return {
-            "id": self.id,
-            "title": self.title,
-            "isbn": self.isbn,
-            "authors": [a.as_dict() for a in self.authors],
-        }
 
     def __repr__(self) -> str:
         return f"<Book id={self.id} title={self.title}>"

@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from my_web.services.book import book_service
+from my_web.schemas.pagination import PaginatedResponse
+from my_web.schemas.book import BookSchema
 
 book_bp = Blueprint("book", __name__, url_prefix="/book")
 book_api_bp = Blueprint("api_book", __name__, url_prefix="/api/v1/book")
@@ -25,20 +27,26 @@ def list():
 
 
 @book_api_bp.route("/list")
-def api_list():
+def api_list() -> dict:
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("size", 10, type=int)
     sort_param = request.args.get("sort")
     filter_param = request.args.get("filter")
 
-    return book_service.get_books(
+    result = book_service.get_books(
         page=page, per_page=per_page, sort_param=sort_param, filter_param=filter_param
     )
+    response_schema = PaginatedResponse[BookSchema](
+        last_page=result["last_page"],
+        data=[BookSchema.model_validate(b) for b in result["data"]],
+    )
+
+    return response_schema.model_dump()
 
 
 @book_api_bp.route("/<int:id>")
-def api_detail(id: int):
+def api_detail(id: int) -> dict:
     book = book_service.get(id)
     if not book:
         return {"error": "Not found"}, 404
-    return book.as_dict()
+    return BookSchema.model_validate(book).model_dump()

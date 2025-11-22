@@ -88,7 +88,7 @@ class TestBookService:
         result = book_service.get_paginated(filter_value="Hobbit")
 
         assert len(result["data"]) == 1
-        assert result["data"][0]["title"] == "The Hobbit"
+        assert result["data"][0].title == "The Hobbit"
 
     def test_09_get_paginated_sort(self):
         """Tests sorting by title."""
@@ -97,6 +97,6 @@ class TestBookService:
             page=1, per_page=10, sort_field="title", sort_dir="desc"
         )
 
-        titles = [b["title"] for b in result["data"]]
+        titles = [b.title for b in result["data"]]
         # Just check that the first item is alphabetically "larger" than the last
         assert titles[0] > titles[-1]

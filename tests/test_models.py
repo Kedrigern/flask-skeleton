@@ -1,4 +1,5 @@
 from my_web.db.models import Author, Book, BookAuthorAssociation, db
+from my_web.schemas.book import BookSchema
 
 
 def test_seed_authors_present(app):
@@ -28,7 +29,7 @@ def test_many_to_many_associations(app):
 
 def test_book_as_dict_includes_authors(app):
     book = Book.query.filter_by(title="1984").first()
-    data = book.as_dict()
+    data = BookSchema.model_validate(book).model_dump()
     assert "authors" in data
     assert isinstance(data["authors"], list)
     assert any(a["name"] == "George Orwell" for a in data["authors"])

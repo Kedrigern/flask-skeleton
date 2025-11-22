@@ -168,7 +168,7 @@ class CRUDService(Generic[T]):
 
         return {
             "last_page": pagination.pages,
-            "data": [entity.as_dict() for entity in pagination.items],
+            "data": pagination.items,
         }
 
     def get_by_name(self, name: str) -> T | None:

@@ -129,7 +129,7 @@ class TestAuthorService:
         )
 
         # 'Tolkien' (J) should be before 'Orwell' (G)
-        first_author_name = result["data"][0]["name"]
+        first_author_name = result["data"][0].name
 
         # Assume 'Terry Pratchett' or 'J.R.R. Tolkien' is at the end of the alphabet
         assert first_author_name.startswith("Terry") or first_author_name.startswith(
@@ -141,4 +141,4 @@ class TestAuthorService:
         result = author_service.get_paginated(filter_value="Tolkien")
 
         assert len(result["data"]) == 1  # Should find 'J.R.R. Tolkien'
-        assert result["data"][0]["name"] == "J.R.R. Tolkien"
+        assert result["data"][0].name == "J.R.R. Tolkien"
