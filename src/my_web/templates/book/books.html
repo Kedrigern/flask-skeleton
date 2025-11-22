@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
-{% block content %}
 
+{% block styles %}
+    <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_bootstrap5.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tabulator-custom.css') }}" >
+{% endblock %}
+
+{% block content %}
 <h2>Books (Classic)</h2>
 <p>Standard server-side rendering. Page reloads on every action.</p>
 
@@ -39,7 +44,12 @@
 </p>
 
 <div id="books-table" data-bs-theme="dark"></div>
+{% endblock %}
 
+{% block scripts %}
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<script src="{{ url_for('static', filename='js/datatable.js') }}"></script>
+<script src="{{ url_for('static', filename='js/formatters.js') }}"></script>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
         const table = new DataTable("#books-table", {

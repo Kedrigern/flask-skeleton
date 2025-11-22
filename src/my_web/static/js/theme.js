@@ -18,10 +18,6 @@
         } else {
             document.documentElement.setAttribute('data-bs-theme', theme)
         }
-
-        // Dispatch event so other components (like Tabulator) can react
-        const event = new CustomEvent('themeChanged', { detail: { theme: theme } });
-        window.dispatchEvent(event);
     }
 
     // Initial setup

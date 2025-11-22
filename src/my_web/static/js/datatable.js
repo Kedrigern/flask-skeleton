@@ -28,7 +28,6 @@ class DataTable {
 
         this.config = { ...defaults, ...options };
 
-        // Vytvoření instance (žádné theme handlery!)
         this.table = new Tabulator(this.selector, this.config);
     }
 
