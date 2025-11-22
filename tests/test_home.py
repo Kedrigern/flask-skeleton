@@ -11,8 +11,8 @@ def client():
         yield client
 
 
-def test_home_renders_template(client):
-    response = client.get("/")
+def test_home_renders_template(fast_client):
+    response = fast_client.get("/")
     data = response.get_data(as_text=True)
     assert response.status_code == 200
     assert "<html" in data
@@ -20,22 +20,22 @@ def test_home_renders_template(client):
     assert "My web" in data
 
 
-def test_home_about_renders_template(client):
-    response = client.get("/about")
+def test_home_about_renders_template(fast_client):
+    response = fast_client.get("/about")
     data = response.get_data(as_text=True)
     assert response.status_code == 200
     assert "Repository" in data
 
 
-def test_404_error_renders_template(client):
-    response = client.get("/nonexistent")
+def test_404_error_renders_template(fast_client):
+    response = fast_client.get("/nonexistent")
     data = response.get_data(as_text=True)
     assert response.status_code == 404
     assert "404 - Page Not Found" in data
     assert "The page you are looking for does not exist." in data
 
 
-def test_500_error_renders_template(client, monkeypatch):
+def test_500_error_renders_template(client):
     # Simulate a view raising an exception
     from flask import Blueprint
 

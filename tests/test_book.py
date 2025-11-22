@@ -2,8 +2,8 @@ import json
 from my_web.db.models import Book
 
 
-def test_book_index_redirects(client):
-    response = client.get("/book/")
+def test_book_index_redirects(fast_client):
+    response = fast_client.get("/book/")
     assert response.status_code == 302
     assert "/book/list" in response.location
 
@@ -16,19 +16,19 @@ def test_book_list_render(fast_client):
     assert "1984" in data
 
 
-def test_book_detail_success(client):
-    book = Book.query.filter_by(title="1984").first()
-    assert book is not None
+def test_book_detail_success(fast_client, seeded_data):
+    _, books = seeded_data
+    book_obj = next(b for b in books if b.title == "1984")
 
-    response = client.get(f"/book/{book.id}")
+    response = fast_client.get(f"/book/{book_obj.id}")
     assert response.status_code == 200
     data = response.get_data(as_text=True)
     assert "1984" in data
     assert "George Orwell" in data
 
 
-def test_book_detail_404(client):
-    response = client.get("/book/999999")
+def test_book_detail_404(fast_client):
+    response = fast_client.get("/book/999999")
     assert response.status_code == 404
     data = response.get_data(as_text=True)
     assert "Page Not Found" in data
