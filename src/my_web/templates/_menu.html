@@ -1,14 +1,50 @@
-<nav>
-    <a href="{{ url_for('home.index') }}">Home</a> |
-    <a href="{{ url_for('book.list') }}">Books</a> |
-    <a href="{{ url_for('home.about') }}">About</a> |
-    {% if current_user.is_authenticated %}
-        User: {{ current_user.name }} |
-        <a href="{{ url_for('user.profile') }}">Profile</a> |
-        <a href="{{ url_for('auth.logout') }}">Logout</a>
-    {% else %}
-        <a href="{{ url_for('auth.login') }}">Login</a> |
-        <a href="{{ url_for('auth.register') }}">Register</a>
-    {% endif %}
-</nav>
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('home.index') }}">Flask App</a>
 
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('home.index') }}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('book.list') }}">Books</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('home.about') }}">About</a>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item me-2">
+            <button class="btn btn-link nav-link" id="theme-toggle" title="Toggle theme">
+                <i class="bi bi-moon-stars-fill"></i>
+            </button>
+            </li>
+        {% if current_user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ current_user.name }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ url_for('user.profile') }}">Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">Logout</a></li>
+              </ul>
+            </li>
+        {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="btn btn-primary btn-sm ms-2" href="{{ url_for('auth.register') }}">Register</a>
+            </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

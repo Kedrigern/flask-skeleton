@@ -1,17 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
 
 <h2>Books (Classic)</h2>
 <p>Standard server-side rendering. Page reloads on every action.</p>
 
-<table>
+<table class="table">
     <thead>
         <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>ISBN</th>
+            <th scope="col">Title</th>
+            <th scope="col">Author</th>
+            <th scope="col">ISBN</th>
         </tr>
     </thead>
     <tbody>
@@ -40,89 +38,47 @@
     Try sorting, paging, or filtering without page reload.
 </p>
 
-<div id="books-table"></div>
+<div id="books-table" data-bs-theme="dark"></div>
 
 <script type="text/javascript">
-    var authorsFormatter = function(cell, formatterParams, onRendered){
-        var authors = cell.getValue();
-        if(authors && authors.length > 0){
-            return authors.map(a => a.name).join(", ");
-        }
-        return "<em style='color: #999;'>No author</em>";
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+        const table = new DataTable("#books-table", {
+            apiUrl: "{{ url_for('api_book.api_list') }}",
 
-    var titleFormatter = function(cell, formatterParams, onRendered){
-        var data = cell.getData();
-        var title = cell.getValue();
-        return `<a href="/book/${data.id}" style="font-weight:bold; text-decoration: none; color: #007bff;">${title}</a>`;
-    };
-
-    var table = new Tabulator("#books-table", {
-        height: "400px",
-        layout: "fitColumns",
-        placeholder: "No Data Available",
-
-        ajaxURL: "{{ url_for('api_book.api_list') }}",
-        ajaxConfig: "GET",
-
-        pagination: true,
-        paginationMode: "remote",
-        sortMode: "remote",
-        filterMode: "remote",
-
-        paginationSize: 5,
-        paginationSizeSelector: [5, 10, 25],
-
-        ajaxURLGenerator: function(url, config, params){
-            var queryParts = [];
-
-            if(params.page) queryParts.push("page=" + params.page);
-            if(params.size) queryParts.push("size=" + params.size);
-
-            if(params.sort && params.sort.length > 0){
-                 queryParts.push("sort=" + encodeURIComponent(JSON.stringify(params.sort)));
-            }
-
-            if(params.filter && params.filter.length > 0){
-                 queryParts.push("filter=" + encodeURIComponent(JSON.stringify(params.filter)));
-            }
-
-            return url + "?" + queryParts.join("&");
-        },
-
-        columns: [
-            {title: "ID", field: "id", width: 60, sorter: "number", hozAlign: "center"},
-            {
-                title: "Title",
-                field: "title",
-                formatter: titleFormatter,
-                sorter: "string",
-                headerFilter: "input",
-                widthGrow: 2
-            },
-            {
-                title: "Authors",
-                field: "authors",
-                formatter: authorsFormatter,
-                sorter: "string",
-                headerSort: true,
-                headerFilter: "input",
-                widthGrow: 1
-            },
-            {title: "ISBN", field: "isbn", sorter: "string", headerFilter: "input"}
-        ],
-
-        locale: true,
-        langs: {
-            "default": {
-                "pagination": {
-                    "first": "First", "last": "Last", "prev": "Prev", "next": "Next",
+            columns: [
+                {
+                    title: "ID",
+                    field: "id",
+                    width: 60,
+                    sorter: "number",
+                    hozAlign: "center"
+                },
+                {
+                    title: "Title",
+                    field: "title",
+                    formatter: Formatters.bookLink,
+                    sorter: "string",
+                    headerFilter: "input",
+                    widthGrow: 2
+                },
+                {
+                    title: "Authors",
+                    field: "authors",
+                    formatter: Formatters.authors,
+                    sorter: "string",
+                    headerSort: true,
+                    headerFilter: "input",
+                    widthGrow: 1
+                },
+                {
+                    title: "ISBN",
+                    field: "isbn",
+                    sorter: "string",
+                    headerFilter: "input"
                 }
-            }
-        }
-    });
+            ]
+        });
 
-    var filterInput = document.getElementById("filter-value");
-    var clearBtn = document.getElementById("filter-clear");
+    });
 </script>
 {% endblock %}

@@ -36,8 +36,11 @@ def load_user(user_id):
 
 
 def create_app(test_config=None) -> Flask:
-    template_dir = os.path.join(os.path.dirname(__file__), "templates")
-    app = Flask(settings.name, template_folder=template_dir)
+    base_dir = os.path.dirname(__file__)
+    template_dir = os.path.join(base_dir, "templates")
+    static_dir = os.path.join(base_dir, "static")
+
+    app = Flask(settings.name, template_folder=template_dir, static_folder=static_dir)
     app.config["SQLALCHEMY_DATABASE_URI"] = settings.sqlalchemy_database_uri
     app.config["SECRET_KEY"] = settings.secret_key
 
