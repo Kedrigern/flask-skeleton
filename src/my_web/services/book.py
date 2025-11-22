@@ -7,11 +7,16 @@ from my_web.services.base import CRUDService
 
 class BookService(CRUDService[Book]):
     MODEL = Book
-    PK_NAME = 'id'
-    FILTER_FIELD = 'title'
+    PK_NAME = "id"
+    FILTER_FIELD = "title"
 
     @staticmethod
-    def get_books(page: int, per_page: int, sort_param: str | None = None, filter_param: str | None = None) -> dict:
+    def get_books(
+        page: int,
+        per_page: int,
+        sort_param: str | None = None,
+        filter_param: str | None = None,
+    ) -> dict:
         """Retrieves a paginated, filtered, and sorted list of books for API."""
 
         columns_map = {"id": Book.id, "title": Book.title, "isbn": Book.isbn}
@@ -28,7 +33,9 @@ class BookService(CRUDService[Book]):
                         continue
 
                     if field == "authors":
-                        stmt = stmt.join(Book.author_associations).join(BookAuthorAssociation.author)
+                        stmt = stmt.join(Book.author_associations).join(
+                            BookAuthorAssociation.author
+                        )
                         stmt = stmt.where(Author.name.ilike(f"%{value}%"))
 
                     elif field in columns_map:
@@ -45,7 +52,9 @@ class BookService(CRUDService[Book]):
                     direction = s.get("dir")
 
                     if field == "authors":
-                        stmt = stmt.outerjoin(Book.author_associations).outerjoin(BookAuthorAssociation.author)
+                        stmt = stmt.outerjoin(Book.author_associations).outerjoin(
+                            BookAuthorAssociation.author
+                        )
                         stmt = stmt.group_by(Book.id)
                         order_col = func.min(Author.name)
 
@@ -71,3 +80,6 @@ class BookService(CRUDService[Book]):
             "last_page": pagination.pages,
             "data": [book.as_dict() for book in pagination.items],
         }
+
+
+book_service = BookService()

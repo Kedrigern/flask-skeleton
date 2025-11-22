@@ -1,6 +1,7 @@
 from typing import TypeVar, Generic
 from sqlalchemy.exc import IntegrityError
 from my_web.extensions import db
+
 T = TypeVar("T", bound=db.Model)
 
 
@@ -9,8 +10,9 @@ class CRUDService(Generic[T]):
     Generic CRUD operations for any SQLAlchemy Model.
     Inheriting services must define MODEL and can optionally override PK_NAME.
     """
+
     MODEL: type[T] = None
-    PK_NAME: str = 'id'
+    PK_NAME: str = "id"
     FILTER_FIELD: str | None = None
 
     @classmethod
@@ -25,36 +27,35 @@ class CRUDService(Generic[T]):
                 "pointing to a SQLAlchemy model class."
             )
 
-    @classmethod
-    def get(cls, entity_id: int) -> T | None:
+    def get(self, entity_id: int) -> T | None:
         """Retrieves a single entity by ID using modern session.get."""
-        return db.session.get(cls.MODEL, entity_id)
+        return db.session.get(self.MODEL, entity_id)
 
-    @classmethod
-    def get_all(cls) -> list[T]:
+    def get_all(self) -> list[T]:
         """Retrieves all entities of the model."""
-        return db.session.execute(db.select(cls.MODEL)).scalars().all()
+        return db.session.execute(db.select(self.MODEL)).scalars().all()
 
-    @classmethod
-    def create(cls, data: dict) -> T:
-        """Creates a new entity from a data dictionary and commits."""
+    def create(self, data: dict, commit: bool = True) -> T:
+        """Creates a new entity from a data dictionary."""
         try:
-            entity = cls.MODEL(**data)
+            entity = self.MODEL(**data)
             db.session.add(entity)
-            db.session.commit()
+            if commit:
+                db.session.commit()
+            else:
+                db.session.flush()
             return entity
         except IntegrityError:
             db.session.rollback()
-            raise ValueError(f"Integrity error when creating {cls.MODEL.__name__}")
+            raise ValueError(f"Integrity error when creating {self.MODEL.__name__}")
 
-    @classmethod
-    def update(cls, entity_id: int, data: dict) -> T | None:
-        """Updates an existing entity by ID and commits. Ignores primary key from data."""
-        entity = cls.get(entity_id)
+    def update(self, entity_id: int, data: dict, commit: bool = True) -> T | None:
+        """Updates an existing entity by ID. Ignores primary key from data."""
+        entity = self.get(entity_id)
         if not entity:
             return None
 
-        pk_name = cls.PK_NAME
+        pk_name = self.PK_NAME
 
         # Update attributes dynamically from data dictionary
         for key, value in data.items():
@@ -67,39 +68,45 @@ class CRUDService(Generic[T]):
                 setattr(entity, key, value)
 
         try:
-            db.session.commit()
+            if commit:
+                db.session.commit()
+            else:
+                db.session.flush()
             return entity
         except IntegrityError:
             db.session.rollback()
-            raise ValueError(f"Integrity error when updating {cls.MODEL.__name__}")
+            raise ValueError(f"Integrity error when updating {self.MODEL.__name__}")
 
-    @classmethod
-    def delete(cls, entity_id: int) -> bool:
-        """Deletes an entity by ID and commits."""
-        entity = cls.get(entity_id)
+    def delete(self, entity_id: int, commit: bool = True) -> bool:
+        """Deletes an entity by ID."""
+        entity = self.get(entity_id)
         if not entity:
             return False
 
         db.session.delete(entity)
-        db.session.commit()
+        if commit:
+            db.session.commit()
+        else:
+            db.session.flush()
         return True
 
-    @classmethod
-    def upsert(cls, entity_id: int | None, data: dict) -> tuple[T, bool]:
+    def upsert(
+        self, entity_id: int | None, data: dict, commit: bool = True
+    ) -> tuple[T, bool]:
         """
-        Creates or updates an entity based on the presence of entity_id and commits.
+        Creates or updates an entity based on the presence of entity_id.
         Returns: tuple of (Entity, is_newly_created: bool)
         """
         is_new = False
         entity = None
 
         if entity_id is not None:
-            entity = cls.get(entity_id)
+            entity = self.get(entity_id)
 
         if entity:
             # UPDATE PATH
             is_new = False
-            pk_name = cls.PK_NAME
+            pk_name = self.PK_NAME
 
             # Apply data fields to existing entity (Update logic)
             for key, value in data.items():
@@ -110,38 +117,49 @@ class CRUDService(Generic[T]):
                     setattr(entity, key, value)
         else:
             is_new = True
-            entity = cls.MODEL(**data)
+            entity = self.MODEL(**data)
             db.session.add(entity)
 
         try:
-            db.session.commit()
+            if commit:
+                db.session.commit()
+            else:
+                db.session.flush()
             return entity, is_new
         except IntegrityError:
             db.session.rollback()
-            raise ValueError(f"Integrity error during upsert of {cls.MODEL.__name__}")
+            raise ValueError(f"Integrity error during upsert of {self.MODEL.__name__}")
 
-    @classmethod
-    def get_paginated(cls, page: int = 1, per_page: int = 10, sort_field: str | None = None, sort_dir: str = 'asc',
-                      filter_value: str | None = None) -> dict:
+    def get_paginated(
+        self,
+        page: int = 1,
+        per_page: int = 10,
+        sort_field: str | None = None,
+        sort_dir: str = "asc",
+        filter_value: str | None = None,
+    ) -> dict:
         """
         Retrieves a paginated list with optional sorting and filtering on the FILTER_FIELD.
-        Returns data in a format suitable for simple API endpoints (e.g., Tabulator).
         """
-        stmt = db.select(cls.MODEL)
+        stmt = db.select(self.MODEL)
 
         # 1. Simple Filtering
-        if filter_value and cls.FILTER_FIELD:
-            col = getattr(cls.MODEL, cls.FILTER_FIELD, None)
+        if filter_value and self.FILTER_FIELD:
+            col = getattr(self.MODEL, self.FILTER_FIELD, None)
             if col is not None:
-                search_pattern = '%' + filter_value + '%'
+                search_pattern = "%" + filter_value + "%"
                 stmt = stmt.where(col.ilike(search_pattern))
 
         # 2. Simple Sorting
-        sort_field = sort_field if sort_field and hasattr(cls.MODEL, sort_field) else cls.PK_NAME
-        col = getattr(cls.MODEL, sort_field, None)
+        sort_field = (
+            sort_field
+            if sort_field and hasattr(self.MODEL, sort_field)
+            else self.PK_NAME
+        )
+        col = getattr(self.MODEL, sort_field, None)
 
         if col is not None:
-            if sort_dir == 'desc':
+            if sort_dir == "desc":
                 stmt = stmt.order_by(col.desc())
             else:
                 stmt = stmt.order_by(col.asc())
@@ -153,11 +171,12 @@ class CRUDService(Generic[T]):
             "data": [entity.as_dict() for entity in pagination.items],
         }
 
-    @classmethod
-    def get_by_name(cls, name: str) -> T | None:
+    def get_by_name(self, name: str) -> T | None:
         """Retrieves a single entity by its name field."""
-        if not hasattr(cls.MODEL, cls.FILTER_FIELD):
-            raise AttributeError(f"{cls.MODEL.__name__} does not have a 'name' attribute.")
+        if not hasattr(self.MODEL, self.FILTER_FIELD):
+            raise AttributeError(
+                f"{self.MODEL.__name__} does not have a 'name' attribute."
+            )
 
-        stmt = db.select(cls.MODEL).where(cls.FILTER_FIELD == name)
+        stmt = db.select(self.MODEL).where(self.FILTER_FIELD == name)
         return db.session.execute(stmt).scalars().first()
