@@ -4,6 +4,7 @@ from sqlalchemy import func
 from my_web.extensions import db
 from my_web.db.models import Book, Author, BookAuthorAssociation
 from my_web.services.base import CRUDService
+from my_web.services.author import author_service
 
 
 class BookService(CRUDService[Book]):
@@ -82,5 +83,32 @@ class BookService(CRUDService[Book]):
             "data": pagination.items,
         }
 
+    def add_author(self, book_id: int, author_id: int) -> bool:
+        """Add author-book relation."""
+        book = self.get(book_id)
+        author = author_service.get(author_id)
+
+        if not book or not author:
+            return False
+
+        if author not in book.authors:
+            book.authors.append(author)
+            db.session.commit()
+
+        return True
+
+    def remove_author(self, book_id: int, author_id: int) -> bool:
+        """Remove author-book relation."""
+        book = self.get(book_id)
+        author = author_service.get(author_id)
+
+        if not book or not author:
+            return False
+
+        if author in book.authors:
+            book.authors.remove(author)
+            db.session.commit()
+
+        return True
 
 book_service = BookService()

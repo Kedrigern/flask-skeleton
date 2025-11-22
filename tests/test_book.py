@@ -137,3 +137,61 @@ def test_api_list_sort_author_desc(client):
     first_book = data["data"][0]
 
     assert "Neil Gaiman" in [a["name"] for a in first_book["authors"]]
+
+
+def test_api_create_update_lifecycle(client, auth):
+    """Lifecycle test: Create, Update, Add author"""
+
+    auth.register("Editor", "editor@example.com", "password")
+    auth.login("editor@example.com", "password")
+
+    # 2. Create Book
+    resp = client.post("/api/v1/book/",
+                       json={"title": "Clean Code", "isbn": "999-888"})
+    assert resp.status_code == 201
+    book_data = resp.get_json()
+    book_id = book_data["id"]
+    assert book_data["authors"] == []
+
+    # 3. Update Book
+    resp = client.patch(f"/api/v1/book/{book_id}",
+                        json={"title": "Clean Coder"})
+    assert resp.status_code == 200
+    assert resp.get_json()["title"] == "Clean Coder"
+
+    # 4. Add Author (George Orwell has ID 1 from fixtures)
+    resp = client.put(f"/api/v1/book/{book_id}/authors/1")
+    assert resp.status_code == 204
+
+    # 5. Verify Author Added
+    resp = client.get(f"/api/v1/book/{book_id}")
+    data = resp.get_json()
+    assert len(data["authors"]) == 1
+    assert data["authors"][0]["name"] == "George Orwell"
+
+    # 6. Remove Author
+    resp = client.delete(f"/api/v1/book/{book_id}/authors/1")
+    assert resp.status_code == 204
+
+    # 7. Verify Empty Again
+    resp = client.get(f"/api/v1/book/{book_id}")
+    assert len(resp.get_json()["authors"]) == 0
+
+
+def test_api_create_validation_error(client, auth):
+    auth.register("Editor", "editor@example.com", "password")
+    auth.login("editor@example.com", "password")
+
+    # Title missing
+    resp = client.post("/api/v1/book/", json={"isbn": "123"})
+    assert resp.status_code == 400
+    assert "title" in str(resp.get_json())
+
+
+def test_api_add_author_not_found(client, auth):
+    auth.register("Editor", "editor@example.com", "password")
+    auth.login("editor@example.com", "password")
+
+    # Non-existent book
+    resp = client.put("/api/v1/book/99999/authors/1")
+    assert resp.status_code == 404
