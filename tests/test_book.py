@@ -8,8 +8,8 @@ def test_book_index_redirects(client):
     assert "/book/list" in response.location
 
 
-def test_book_list_render(client):
-    response = client.get("/book/list")
+def test_book_list_render(fast_client):
+    response = fast_client.get("/book/list")
     assert response.status_code == 200
     data = response.get_data(as_text=True)
     assert "Books" in data
