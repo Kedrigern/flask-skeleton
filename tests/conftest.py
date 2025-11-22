@@ -41,8 +41,7 @@ def auth(client):
 class MockSession:
     def __init__(self, initial_authors=None, initial_books=None):
         self.store = {
-            Author: {a.id: a for a in
-                     initial_authors} if initial_authors else {},
+            Author: {a.id: a for a in initial_authors} if initial_authors else {},
             Book: {b.id: b for b in initial_books} if initial_books else {},
         }
         self.new_id_counters = {
@@ -59,7 +58,7 @@ class MockSession:
             self.store[model] = {}
             self.new_id_counters[model] = 1
 
-        if getattr(instance, 'id', None) is None:
+        if getattr(instance, "id", None) is None:
             instance.id = self.new_id_counters[model]
             self.new_id_counters[model] += 1
 
@@ -121,6 +120,7 @@ def seeded_data():
 
     return authors, books
 
+
 @pytest.fixture
 def app():
     test_config = {
@@ -139,6 +139,7 @@ def app():
         db.drop_all()
         db.engine.dispose()
 
+
 @pytest.fixture
 def fast_app(seeded_data):
     """
@@ -150,20 +151,23 @@ def fast_app(seeded_data):
     test_config = {
         "TESTING": True,
         "WTF_CSRF_ENABLED": False,
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:", # Will be ignored
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",  # Will be ignored
     }
 
     with patch("my_web.extensions.db.session", mock_session):
         app = create_app(test_config=test_config)
         yield app
 
+
 @pytest.fixture
 def client(app):
     return app.test_client()
 
+
 @pytest.fixture
 def fast_client(fast_app):
     return fast_app.test_client()
+
 
 @pytest.fixture
 def runner(app):

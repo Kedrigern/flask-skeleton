@@ -4,11 +4,7 @@ from my_web.schemas.book import BookSchema
 
 
 def test_book_schema_validation():
-    raw_data = {
-        "id": 1,
-        "title": "Test Book",
-        "authors": [{"id": 2, "name": "Author"}]
-    }
+    raw_data = {"id": 1, "title": "Test Book", "authors": [{"id": 2, "name": "Author"}]}
 
     book = BookSchema(**raw_data)
     assert book.id == 1
