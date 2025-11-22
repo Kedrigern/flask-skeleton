@@ -111,4 +111,5 @@ class BookService(CRUDService[Book]):
 
         return True
 
+
 book_service = BookService()

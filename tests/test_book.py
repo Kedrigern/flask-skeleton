@@ -146,16 +146,14 @@ def test_api_create_update_lifecycle(client, auth):
     auth.login("editor@example.com", "password")
 
     # 2. Create Book
-    resp = client.post("/api/v1/book/",
-                       json={"title": "Clean Code", "isbn": "999-888"})
+    resp = client.post("/api/v1/book/", json={"title": "Clean Code", "isbn": "999-888"})
     assert resp.status_code == 201
     book_data = resp.get_json()
     book_id = book_data["id"]
     assert book_data["authors"] == []
 
     # 3. Update Book
-    resp = client.patch(f"/api/v1/book/{book_id}",
-                        json={"title": "Clean Coder"})
+    resp = client.patch(f"/api/v1/book/{book_id}", json={"title": "Clean Coder"})
     assert resp.status_code == 200
     assert resp.get_json()["title"] == "Clean Coder"
 

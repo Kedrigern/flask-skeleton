@@ -64,7 +64,10 @@ def api_create():
         book = book_service.create(schema.model_dump())
         return BookSchema.model_validate(book).model_dump(), HTTPStatus.CREATED
     except ValidationError as e:
-        return {"error": "Validation error", "details": e.errors()}, HTTPStatus.BAD_REQUEST
+        return {
+            "error": "Validation error",
+            "details": e.errors(),
+        }, HTTPStatus.BAD_REQUEST
     except ValueError as e:
         return {"error": str(e)}, HTTPStatus.CONFLICT
 
@@ -83,7 +86,10 @@ def api_update(id: int):
 
         return BookSchema.model_validate(updated_book).model_dump(), HTTPStatus.OK
     except ValidationError as e:
-        return {"error": "Validation error", "details": e.errors()}, HTTPStatus.BAD_REQUEST
+        return {
+            "error": "Validation error",
+            "details": e.errors(),
+        }, HTTPStatus.BAD_REQUEST
     except ValueError as e:
         return {"error": str(e)}, HTTPStatus.CONFLICT
 
@@ -97,8 +103,7 @@ def api_add_author(book_id: int, author_id: int):
     return {}, HTTPStatus.NO_CONTENT
 
 
-@book_api_bp.route("/<int:book_id>/authors/<int:author_id>",
-                   methods=["DELETE"])
+@book_api_bp.route("/<int:book_id>/authors/<int:author_id>", methods=["DELETE"])
 @login_required
 def api_remove_author(book_id: int, author_id: int):
     success = book_service.remove_author(book_id, author_id)
