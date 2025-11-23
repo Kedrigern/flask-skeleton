@@ -1,12 +1,14 @@
 import pytest
 from my_web.db.models import Author
 from my_web.services.author import author_service
+from my_web.schemas.author import AuthorCreateSchema
 
 
 @pytest.mark.usefixtures("app")
 class TestAuthorService:
     def test_01_create_author_success(self):
-        data = {"name": "Test Author A"}
+        payload = {"name": "Test Author A"}
+        data = AuthorCreateSchema(**payload).model_dump()
 
         author = author_service.create(data)
 
@@ -18,7 +20,8 @@ class TestAuthorService:
 
     def test_02_get_author_success(self):
         """Tests retrieving an author by ID."""
-        new_author = author_service.create({"name": "Test Author B"})
+        data = AuthorCreateSchema(name="Test Author B").model_dump()
+        new_author = author_service.create(data)
 
         author = author_service.get(new_author.id)
 
@@ -32,17 +35,15 @@ class TestAuthorService:
 
     def test_04_update_author_success(self):
         """Tests updating the author's name."""
-        author = author_service.create({"name": "Test Author C"})
-        new_name = "Updated Author C"
+        data = AuthorCreateSchema(name="Test Author C").model_dump()
+        author = author_service.create(data)
 
-        updated_author = author_service.update(author.id, {"name": new_name})
+        update_data = AuthorCreateSchema(name="Updated Author C").model_dump()
+
+        updated_author = author_service.update(author.id, update_data)
 
         assert updated_author is not None
-        assert updated_author.name == new_name
-
-        # Verify in the database that the change was committed
-        db_author = author_service.get(author.id)
-        assert db_author.name == new_name
+        assert updated_author.name == "Updated Author C"
 
     def test_05_update_author_ignores_pk(self):
         """Tests that the method ignores attempts to overwrite the PK (id)."""

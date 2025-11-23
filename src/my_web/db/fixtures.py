@@ -1,88 +1,127 @@
 from my_web.db.models import Author, Book
 from my_web.extensions import db
+from my_web.schemas.book import BookCreateSchema
+from my_web.schemas.author import AuthorCreateSchema
+
+RAW_AUTHORS = [
+    {"name": "George Orwell"},
+    {"name": "J.R.R. Tolkien"},
+    {"name": "Andrzej Sapkowski"},
+    {"name": "Terry Pratchett"},
+    {"name": "Neil Gaiman"},
+]
+
+RAW_BOOKS = [
+    {
+        "data": {"title": "1984", "isbn": "9780452284234"},
+        "authors": ["George Orwell"]
+    },
+    {
+        "data": {"title": "The Hobbit", "isbn": "9780547928227"},
+        "authors": ["J.R.R. Tolkien"]
+    },
+    {
+        "data": {"title": "The Lord of the Rings", "isbn": None},
+        "authors": ["J.R.R. Tolkien"]
+    },
+    {
+        "data": {"title": "The Silmarillion", "isbn": "978-0-04-823139-0"},
+        "authors": ["J.R.R. Tolkien"]
+    },
+    {
+        "data": {"title": "The Witcher: The Last Wish", "isbn": "978-0-575-08244-1"},
+        "authors": ["Andrzej Sapkowski"]
+    },
+    {
+        "data": {"title": "Good Omens", "isbn": "978-0-575-07919-3"},
+        "authors": ["Terry Pratchett", "Neil Gaiman"]
+    },
+    {
+        "data": {"title": "American Gods", "isbn": "978-0-06-257223-3"},
+        "authors": ["Neil Gaiman"]
+    },
+]
 
 
-def get_initial_data():
+def get_initial_data() -> tuple[list[Author], list[Book]]:
     """
-    Vrací čistá data (instance modelů) bez vazby na DB session.
-    Toto využijeme v testech pro naplnění Mocku.
+    Returns clean data (model instances) without DB session binding.
+    Data is validated via Pydantic schemas.
+    Used for testing mocks.
     """
-    authors = [
-        Author(name="George Orwell"),
-        Author(name="J.R.R. Tolkien"),
-        Author(name="Andrzej Sapkowski"),
-        Author(name="Terry Pratchett"),
-        Author(name="Neil Gaiman"),
-    ]
+    authors_orm = []
+    for author_data in RAW_AUTHORS:
+        schema = AuthorCreateSchema(**author_data)
+        authors_orm.append(Author(**schema.model_dump()))
 
-    auth_map = {a.name: a for a in authors}
+    # Map for quick author lookup by name
+    auth_map = {a.name: a for a in authors_orm}
 
-    books = [
-        Book(title="1984", isbn=None, authors=[auth_map["George Orwell"]]),
-        Book(title="The Hobbit", isbn=None, authors=[auth_map["J.R.R. Tolkien"]]),
-        Book(
-            title="The Lord of the Rings",
-            isbn=None,
-            authors=[auth_map["J.R.R. Tolkien"]],
-        ),
-        Book(
-            title="The Silmarillion",
-            isbn="978-0-04-823139-0",
-            authors=[auth_map["J.R.R. Tolkien"]],
-        ),
-        Book(
-            title="The Witcher: The Last Wish",
-            isbn="978-0-575-08244-1",
-            authors=[auth_map["Andrzej Sapkowski"]],
-        ),
-        Book(
-            title="Good Omens",
-            isbn="978-0-575-07919-3",
-            authors=[auth_map["Terry Pratchett"], auth_map["Neil Gaiman"]],
-        ),
-        Book(
-            title="American Gods",
-            isbn="978-0-06-257223-3",
-            authors=[auth_map["Neil Gaiman"]],
-        ),
-    ]
+    books_orm = []
 
-    return authors, books
+    for entry in RAW_BOOKS:
+        book_schema = BookCreateSchema(**entry["data"])
+
+        # Convert validated schema to ORM object
+        book_instance = Book(**book_schema.model_dump())
+
+        # 3. Manually handle relationships (Many-to-Many)
+        # Since BookCreateSchema doesn't handle relationship logic, we do it here
+        for author_name in entry["authors"]:
+            if author_name in auth_map:
+                book_instance.authors.append(auth_map[author_name])
+            else:
+                raise ValueError(f"Author '{author_name}' not found in author definitions.")
+
+        books_orm.append(book_instance)
+
+    return authors_orm, books_orm
 
 
-def initial_library_data(app):
+def initial_library_data(app) -> None:
     """
-    Seed initial authors and books into real DB.
-    Idempotent: existing authors/books are reused.
+    Seed initial authors and books into the real DB.
+    Idempotent: existing authors/books are reused to prevent duplicates.
     """
     authors_to_create, books_to_create = get_initial_data()
 
     with app.app_context():
         persisted_authors = {}
+
+        # Persist authors
         for author in authors_to_create:
             existing = Author.query.filter_by(name=author.name).first()
             if existing:
                 persisted_authors[author.name] = existing
             else:
+                # Add new instance to the session
                 db.session.add(author)
                 persisted_authors[author.name] = author
+
         db.session.commit()
 
-        for book_data in books_to_create:
-            existing_book = Book.query.filter_by(title=book_data.title).first()
+        # Persist books
+        for book_orm in books_to_create:
+            existing_book = Book.query.filter_by(title=book_orm.title).first()
 
             if not existing_book:
-                real_authors = [persisted_authors[a.name] for a in book_data.authors]
+                # Remap authors to those present in the current DB session
+                # because `book_orm.authors` contains "offline" instances from get_initial_data
+                real_authors = [persisted_authors[a.name] for a in book_orm.authors]
 
-                new_book = Book(title=book_data.title, isbn=book_data.isbn)
-                for a in real_authors:
-                    new_book.authors.append(a)
+                # Clear "offline" authors and attach "online" (session-bound) authors
+                book_orm.authors = []
+                for ra in real_authors:
+                    book_orm.authors.append(ra)
 
-                db.session.add(new_book)
+                db.session.add(book_orm)
             else:
-                real_authors = [persisted_authors[a.name] for a in book_data.authors]
-                for a in real_authors:
-                    if a not in existing_book.authors:
-                        existing_book.authors.append(a)
+                # If book exists, ensure all authors are associated
+                target_author_names = [a.name for a in book_orm.authors]
+                real_authors = [persisted_authors[name] for name in target_author_names]
+
+                for ra in real_authors:
+                    if ra not in existing_book.authors:
+                        existing_book.authors.append(ra)
 
         db.session.commit()

@@ -1,13 +1,15 @@
 import pytest
 from my_web.db.models import Book
 from my_web.services.book import book_service
+from my_web.schemas.book import BookCreateSchema, BookUpdateSchema
 
 
 @pytest.mark.usefixtures("app")
 class TestBookService:
     def test_01_create_book_success(self):
         """Tests creating a new book using a dictionary (DTO)."""
-        data = {"title": "New Simple Book", "isbn": "123-456-789"}
+        payload = {"title": "New Simple Book", "isbn": "123-456-789"}
+        data = BookCreateSchema(**payload).model_dump()
 
         book = book_service.create(data)
 
@@ -20,18 +22,17 @@ class TestBookService:
         assert retrieved_book is not None
 
     def test_02_get_book_success(self):
-        """Tests retrieving a book by ID."""
-        # '1984' exists from fixtures
+        """Tests retrieving a book by ID.
+        '1984' exists from fixtures"""
         book_in_db = Book.query.filter_by(title="1984").first()
-
         book = book_service.get(book_in_db.id)
-
         assert book is not None
         assert book.title == "1984"
 
     def test_03_update_book_success(self):
         """Tests updating a book's attributes."""
-        book = book_service.create({"title": "Old Title"})
+        init_data = BookCreateSchema(title="Old Title").model_dump()
+        book = book_service.create(init_data)
         new_title = "Updated Title"
 
         updated_book = book_service.update(book.id, {"title": new_title})
@@ -45,7 +46,8 @@ class TestBookService:
 
     def test_04_delete_book_success(self):
         """Tests deleting an existing book."""
-        book = book_service.create({"title": "To Be Deleted"})
+        data = BookCreateSchema(title="To Be Deleted").model_dump()
+        book = book_service.create(data)
         book_id = book.id
 
         result = book_service.delete(book_id)
@@ -55,7 +57,7 @@ class TestBookService:
 
     def test_05_upsert_create_new(self):
         """Tests creating a new book via upsert (ID=None)."""
-        data = {"title": "Upserted New Book"}
+        data = BookCreateSchema(title="Upserted New Book").model_dump()
 
         book, is_new = book_service.upsert(None, data)
 
@@ -65,10 +67,14 @@ class TestBookService:
 
     def test_06_upsert_update_existing(self):
         """Tests updating an existing book via upsert."""
-        book = book_service.create({"title": "Original Upsert"})
+        init_data = BookCreateSchema(title="Original Upsert").model_dump()
+        book = book_service.create(init_data)
+
+        update_data = BookCreateSchema(title="Updated via Upsert").model_dump(
+            exclude_unset=True)
 
         updated_book, is_new = book_service.upsert(
-            book.id, {"title": "Updated via Upsert"}
+            book.id, update_data
         )
 
         assert is_new is False
