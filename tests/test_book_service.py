@@ -1,7 +1,7 @@
 import pytest
 from my_web.db.models import Book
 from my_web.services.book import book_service
-from my_web.schemas.book import BookCreateSchema, BookUpdateSchema
+from my_web.schemas.book import BookCreateSchema
 
 
 @pytest.mark.usefixtures("app")
@@ -71,11 +71,10 @@ class TestBookService:
         book = book_service.create(init_data)
 
         update_data = BookCreateSchema(title="Updated via Upsert").model_dump(
-            exclude_unset=True)
-
-        updated_book, is_new = book_service.upsert(
-            book.id, update_data
+            exclude_unset=True
         )
+
+        updated_book, is_new = book_service.upsert(book.id, update_data)
 
         assert is_new is False
         assert updated_book.id == book.id
