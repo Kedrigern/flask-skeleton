@@ -6,10 +6,10 @@ def logout(client):
 
 
 def test_register_success(auth):
-    response = auth.register("Test", "test@example.com", "password")
+    response = auth.register("Test", "abcd@example.com", "password")
     data = response.get_data(as_text=True)
     assert "User profile" in data
-    user = User.query.filter_by(email="test@example.com").first()
+    user = User.query.filter_by(email="abcd@example.com").first()
     assert user is not None
 
 
@@ -21,14 +21,12 @@ def test_register_duplicate_email(auth):
 
 
 def test_login_success(auth):
-    auth.register("Test", "test@example.com", "password")
     response = auth.login("test@example.com", "password")
     data = response.get_data(as_text=True)
     assert "User profile" in data
 
 
 def test_login_invalid(auth):
-    auth.register("Test", "test@example.com", "password")
     response = auth.login("test@example.com", "wrongpass")
     data = response.get_data(as_text=True)
     assert "Invalid email or password" in data

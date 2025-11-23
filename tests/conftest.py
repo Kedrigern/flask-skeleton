@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from my_web.app import create_app
 from my_web.extensions import db
-from my_web.db.models import Author, Book
+from my_web.db.models import Author, Book, User
 from my_web.db.fixtures import initial_library_data, get_initial_data
 
 
@@ -39,14 +39,16 @@ def auth(client):
 
 
 class MockSession:
-    def __init__(self, initial_authors=None, initial_books=None):
+    def __init__(self, initial_authors=None, initial_books=None, initial_users=None):
         self.store = {
             Author: {a.id: a for a in initial_authors} if initial_authors else {},
             Book: {b.id: b for b in initial_books} if initial_books else {},
+            User: {u.id: u for u in initial_users} if initial_users else {},
         }
         self.new_id_counters = {
             Author: len(initial_authors) + 1 if initial_authors else 1,
             Book: len(initial_books) + 1 if initial_books else 1,
+            User: len(initial_users) + 1 if initial_users else 1,
         }
 
     def get(self, model, id):
@@ -110,7 +112,7 @@ class MockSession:
 
 @pytest.fixture
 def seeded_data():
-    authors, books = get_initial_data()
+    authors, books, users = get_initial_data()
 
     for i, author in enumerate(authors, start=1):
         author.id = i
@@ -118,7 +120,10 @@ def seeded_data():
     for i, book in enumerate(books, start=1):
         book.id = i
 
-    return authors, books
+    for i, user in enumerate(users, start=1):
+        user.id = i
+
+    return authors, books, users
 
 
 @pytest.fixture
@@ -145,8 +150,10 @@ def fast_app(seeded_data):
     """
     App without DB, using MockSession filled with fixture data.
     """
-    authors, books = seeded_data
-    mock_session = MockSession(initial_authors=authors, initial_books=books)
+    authors, books, users = seeded_data
+    mock_session = MockSession(
+        initial_authors=authors, initial_books=books, initial_users=users
+    )
 
     test_config = {
         "TESTING": True,

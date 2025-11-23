@@ -17,7 +17,7 @@ def test_book_list_render(fast_client):
 
 
 def test_book_detail_success(fast_client, seeded_data):
-    _, books = seeded_data
+    _, books, _ = seeded_data
     book_obj = next(b for b in books if b.title == "1984")
 
     response = fast_client.get(f"/book/{book_obj.id}")

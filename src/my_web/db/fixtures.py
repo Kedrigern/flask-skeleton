@@ -1,5 +1,6 @@
-from my_web.db.models import Author, Book
-from my_web.extensions import db
+from my_web.db.models import Author, Book, User, Role
+from my_web.extensions import db, bcrypt
+from my_web.schemas.user import UserCreateSchema
 from my_web.schemas.book import BookCreateSchema
 from my_web.schemas.author import AuthorCreateSchema
 
@@ -39,8 +40,23 @@ RAW_BOOKS = [
     },
 ]
 
+RAW_USERS = [
+    {
+        "name": "Admin User",
+        "email": "admin@example.com",
+        "password": "password",
+        "role": Role.ADMIN,
+    },
+    {
+        "name": "Test User",
+        "email": "test@example.com",
+        "password": "password",
+        "role": Role.USER,
+    },
+]
 
-def get_initial_data() -> tuple[list[Author], list[Book]]:
+
+def get_initial_data() -> tuple[list[Author], list[Book], list[User]]:
     """
     Returns clean data (model instances) without DB session binding.
     Data is validated via Pydantic schemas.
@@ -74,7 +90,20 @@ def get_initial_data() -> tuple[list[Author], list[Book]]:
 
         books_orm.append(book_instance)
 
-    return authors_orm, books_orm
+    users_orm = []
+    for user_data in RAW_USERS:
+        schema = UserCreateSchema(**user_data)
+
+        # Prepare ORM data (hash password)
+        data = schema.model_dump()
+        plain_password = data.pop("password")
+        hashed_pw = bcrypt.generate_password_hash(plain_password).decode("utf-8")
+
+        # Create User instance
+        user_instance = User(hashed_password=hashed_pw, **data)
+        users_orm.append(user_instance)
+
+    return authors_orm, books_orm, users_orm
 
 
 def initial_library_data(app) -> None:
@@ -82,9 +111,14 @@ def initial_library_data(app) -> None:
     Seed initial authors and books into the real DB.
     Idempotent: existing authors/books are reused to prevent duplicates.
     """
-    authors_to_create, books_to_create = get_initial_data()
+    authors_to_create, books_to_create, users_to_create = get_initial_data()
 
     with app.app_context():
+        for user_orm in users_to_create:
+            existing_user = User.query.filter_by(email=user_orm.email).first()
+            if not existing_user:
+                db.session.add(user_orm)
+
         persisted_authors = {}
 
         # Persist authors
