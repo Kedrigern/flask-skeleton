@@ -12,33 +12,30 @@ RAW_AUTHORS = [
 ]
 
 RAW_BOOKS = [
-    {
-        "data": {"title": "1984", "isbn": "9780452284234"},
-        "authors": ["George Orwell"]
-    },
+    {"data": {"title": "1984", "isbn": "9780452284234"}, "authors": ["George Orwell"]},
     {
         "data": {"title": "The Hobbit", "isbn": "9780547928227"},
-        "authors": ["J.R.R. Tolkien"]
+        "authors": ["J.R.R. Tolkien"],
     },
     {
         "data": {"title": "The Lord of the Rings", "isbn": None},
-        "authors": ["J.R.R. Tolkien"]
+        "authors": ["J.R.R. Tolkien"],
     },
     {
         "data": {"title": "The Silmarillion", "isbn": "978-0-04-823139-0"},
-        "authors": ["J.R.R. Tolkien"]
+        "authors": ["J.R.R. Tolkien"],
     },
     {
         "data": {"title": "The Witcher: The Last Wish", "isbn": "978-0-575-08244-1"},
-        "authors": ["Andrzej Sapkowski"]
+        "authors": ["Andrzej Sapkowski"],
     },
     {
         "data": {"title": "Good Omens", "isbn": "978-0-575-07919-3"},
-        "authors": ["Terry Pratchett", "Neil Gaiman"]
+        "authors": ["Terry Pratchett", "Neil Gaiman"],
     },
     {
         "data": {"title": "American Gods", "isbn": "978-0-06-257223-3"},
-        "authors": ["Neil Gaiman"]
+        "authors": ["Neil Gaiman"],
     },
 ]
 
@@ -71,7 +68,9 @@ def get_initial_data() -> tuple[list[Author], list[Book]]:
             if author_name in auth_map:
                 book_instance.authors.append(auth_map[author_name])
             else:
-                raise ValueError(f"Author '{author_name}' not found in author definitions.")
+                raise ValueError(
+                    f"Author '{author_name}' not found in author definitions."
+                )
 
         books_orm.append(book_instance)
 

@@ -41,7 +41,7 @@ src/my_web/
 └── static/             # CSS/JS assets
 ```
 
-##🚀 Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -62,12 +62,6 @@ uv run db-fixtures      # Load initial demo data (users, books)
 
 ```
 uv run web              # run the web server
-```
-
-### Debugging with shell
-
-```
-uv run shell            # run a python shell with app context
 ```
 
 ## 🛠 Development Workflow
