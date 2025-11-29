@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
-from my_web.schemas.base import ORMModel
+
 from my_web.schemas.author import AuthorSchema
+from my_web.schemas.base import ORMModel
 
 
 class BookSchema(ORMModel):
@@ -8,6 +11,9 @@ class BookSchema(ORMModel):
     title: str
     isbn: str | None = None
     authors: list[AuthorSchema] = []
+
+    created_at: datetime
+    updated_at: datetime
 
 
 class BookCreateSchema(BaseModel):

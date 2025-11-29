@@ -1,13 +1,14 @@
+from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Enum as SAEnum
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy import String, JSON
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.ext.mutable import MutableDict
 from flask_login import UserMixin
+from sqlalchemy import JSON, DateTime, String
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 
 from my_web.extensions import db
 
@@ -17,7 +18,24 @@ class Role(Enum):
     ADMIN = "admin"
 
 
-class User(db.Model, UserMixin):
+class TimestampMixin:
+    """
+    Mixin for times logs
+    """
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+
+class User(db.Model, UserMixin, TimestampMixin):
     """Application user model."""
 
     __tablename__ = "users"
@@ -57,7 +75,7 @@ class BookAuthorAssociation(db.Model):
         )
 
 
-class Author(db.Model):
+class Author(db.Model, TimestampMixin):
     """Author model representing a book author."""
 
     __tablename__ = "authors"
@@ -67,7 +85,7 @@ class Author(db.Model):
     preferences: Mapped[dict | None] = mapped_column(
         MutableDict.as_mutable(JSON().with_variant(JSONB, "postgresql")),
         nullable=True,
-        default=dict
+        default=dict,
     )
 
     book_associations = relationship(
@@ -84,7 +102,7 @@ class Author(db.Model):
         return f"<Author id={self.id} name={self.name}>"
 
 
-class Book(db.Model):
+class Book(db.Model, TimestampMixin):
     """Book model representing a book."""
 
     __tablename__ = "books"

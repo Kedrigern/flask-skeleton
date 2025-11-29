@@ -1,6 +1,9 @@
-from pydantic import BaseModel, Field, EmailStr
-from my_web.schemas.base import ORMModel
+from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field
+
 from my_web.db.models import Role
+from my_web.schemas.base import ORMModel
 
 
 class UserSchema(ORMModel):
@@ -8,6 +11,9 @@ class UserSchema(ORMModel):
     name: str
     email: str
     role: Role
+
+    created_at: datetime
+    updated_at: datetime
 
 
 class UserCreateSchema(BaseModel):
