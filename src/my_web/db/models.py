@@ -4,7 +4,9 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.associationproxy import association_proxy
-
+from sqlalchemy import String, JSON
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.mutable import MutableDict
 from flask_login import UserMixin
 
 from my_web.extensions import db
@@ -62,6 +64,11 @@ class Author(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(60), nullable=False, unique=True)
+    preferences: Mapped[dict | None] = mapped_column(
+        MutableDict.as_mutable(JSON().with_variant(JSONB, "postgresql")),
+        nullable=True,
+        default=dict
+    )
 
     book_associations = relationship(
         "BookAuthorAssociation", back_populates="author", cascade="all, delete-orphan"
