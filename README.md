@@ -82,3 +82,11 @@ uv run shell
 >>> from my_web.services.book import book_service
 >>> book_service.get_all()
 ```
+
+## TODO
+
+- [ ] Add cli command to create admin user
+- [ ] Highlight active nav link
+- [ ] Optimize tests: more scenario instead of unit
+- [ ] Formatters in Tabular (links, dates, etc)
+- [ ] Complex forms? (JS logic)
